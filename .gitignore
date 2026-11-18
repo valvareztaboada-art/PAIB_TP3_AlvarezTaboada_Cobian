@@ -1,0 +1,19 @@
+# Entorno
+.pixi/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Datos crudos de HRF (se descargan de la FAU; ver README)
+data/HRF/
+# Cachés regenerables con los scripts
+data/procesado/*
+!data/procesado/.gitkeep
+
+# Material de consulta local (no forma parte del trabajo)
+_referencia/
+/*.pdf
+
+# Pesos grandes: decidir al final si se suben con LFS o como release
+modelos/*.pt
