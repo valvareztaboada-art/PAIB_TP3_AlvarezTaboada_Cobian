@@ -77,7 +77,7 @@ class Panel(QWidget):
         """Carga imágenes y Shapes del proyecto; las posiciones se leen exclusivamente del JSON."""
         super().__init__();self.viewer=viewer;self.project=Path(project)
         self.root=self.project/'resultados';self.region_path=self.project/'rois/seleccion_final/regiones.json'
-        self.settings=copy.deepcopy(wf.DEFAULTS);self.roi_choices={};self.worker=None;self.roi_layers=[]
+        self.settings=copy.deepcopy(wf.DEFAULTS);self.roi_choices={};self.worker=None;self.roi_layers=[];self.capas_cargadas=False
         self.current_activity=None;self.fields={};self.loaded_review=None;self.busy=False;self.paginas={}
         self.pool={m['layer_name']:(a,m) for a,m in load_pool(self.project)}
         self.payload,self.regions=wf.load_regions(self.region_path)
@@ -94,7 +94,9 @@ class Panel(QWidget):
         self.progress=QProgressBar();layout.addWidget(self.progress)
         self.status=QLabel('Listo. Regiones cargadas desde el archivo del proyecto.');self.status.setWordWrap(True);layout.addWidget(self.status)
         self.log=QPlainTextEdit();self.log.setReadOnly(True);self.log.setMaximumHeight(140);layout.addWidget(self.log)
-        self._load_layers();self._fill_region_table();self._change_activity();self._refresh_review()
+        # Las imágenes del pool y las ROIs se agregan al visor recién cuando se piden
+        # (botón «Cargar pool…» o cualquier acción que las necesite): napari abre vacío.
+        self._fill_region_table();self._change_activity();self._refresh_review()
         self.setMinimumWidth(510)
         viewer.window._qt_window.installEventFilter(self)
 
@@ -107,6 +109,7 @@ class Panel(QWidget):
     def _highlight_roi(self,row,column):
         """Selecciona en Shapes la figura de una fila de la tabla de nombres."""
         if row<0 or row>=len(self.regions):return
+        self._asegurar_capas()
         region=self.regions[row]
         for layer in self.roi_layers:
             layer.selected_data={region['index']} if layer.name==region['layer_name'] else set()
@@ -141,7 +144,7 @@ class Panel(QWidget):
         label=QLabel('Regiones cargadas desde rois/seleccion_final/regiones.json.\nLas figuras Shapes son editables. Cada región tiene un identificador y un fondo asignado.');label.setWordWrap(True);layout.addWidget(label)
         self.region_table=QTableWidget(0,4);self.region_table.setHorizontalHeaderLabels(['Nombre permanente','Tipo','Fondo asignado','Píxeles'])
         self.region_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents);self.region_table.cellClicked.connect(self._highlight_roi);layout.addWidget(self.region_table)
-        layout.addWidget(button('Mostrar ROIs sobre Retina1',self._show_regions))
+        layout.addWidget(button('Cargar pool de retinas y ROIs en el visor (sobre Retina1)',self._show_regions))
         layout.addWidget(button('Guardar nombres y cambios hechos en Shapes',self._save_shapes))
         layout.addWidget(button('Duplicar una ROI para evaluar sensibilidad a sus bordes',self._duplicate_roi))
         layout.addWidget(button('Importar otro regiones.json…',self._import_regions))
@@ -202,8 +205,13 @@ class Panel(QWidget):
         if not path.exists():raise ValueError(f'No existe {path}')
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(path.resolve())))
 
+    def _asegurar_capas(self):
+        """Carga imágenes y ROIs en el visor si todavía no están (nunca guarda sin ellas)."""
+        if not self.capas_cargadas:self._load_layers()
+
     def _load_layers(self):
         """Reconstruye imágenes y capas Shapes desde archivos, conservando las figuras editables."""
+        self.capas_cargadas=True
         for name,(image,meta) in self.pool.items():
             if name not in self.viewer.layers:
                 self.viewer.add_image(image,name=name,metadata=meta,colormap='gray',contrast_limits=(0,255),visible=False)
@@ -216,6 +224,7 @@ class Panel(QWidget):
 
     def _show_regions(self):
         """Muestra la imagen de referencia y las figuras guardadas sin alterar sus coordenadas."""
+        self._asegurar_capas()
         reference=next(n for n,(a,m) in self.pool.items() if m['case_id']=='Retina1_2' and m['variant']=='original')
         for name in self.pool:self.viewer.layers[name].visible=name==reference
         for layer in self.roi_layers:layer.visible=True
@@ -233,6 +242,7 @@ class Panel(QWidget):
 
     def _save_shapes(self):
         """Guarda vértices editados y propiedades en el JSON original, con respaldo previo."""
+        self._asegurar_capas()
         if self.busy:raise ValueError('Esperar o detener el lote antes de modificar las regiones.')
         for layer in self.roi_layers:
             old=[r for r in self.regions if r['layer_name']==layer.name]
@@ -253,6 +263,7 @@ class Panel(QWidget):
 
     def _duplicate_roi(self):
         """Duplica una figura como nueva ROI identificada, dejando intacta la selección original."""
+        self._asegurar_capas()
         if self.busy:
             raise ValueError('Esperar al final del lote.')
         self._save_shapes()
@@ -454,6 +465,7 @@ class Panel(QWidget):
 
     def _open_review(self):
         """Carga una máscara guardada en Labels editable sobre la imagen que le corresponde."""
+        self._asegurar_capas()
         row=self.review_table.currentRow()
         if row<0:raise ValueError('Seleccionar una fila de máscara.')
         name,region,rec=self.review_records[row]

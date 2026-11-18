@@ -62,7 +62,8 @@ solapas con secciones plegables:
 | Resultados | Registro del pipeline y CSV · Resultados de descriptores · Comparación ML vs DL · Robustez frente a degradaciones |
 
 Debajo del visor quedan fijos el informe de texto de cada operación y el progreso de los cálculos
-por lotes. Las herramientas de calidad y preprocesamiento guardan en `resultados/tp1/`; las de
+por lotes. El visor abre vacío: el pool de retinas y sus regiones se cargan desde
+Datos › Regiones persistentes, o automáticamente al usar una herramienta que los necesita. Las herramientas de calidad y preprocesamiento guardan en `resultados/tp1/`; las de
 descriptores trabajan sobre `espacio_tp2/`.
 
 ## División de los datos
