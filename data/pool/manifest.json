@@ -13,7 +13,7 @@
       "case_id": "Retina1_2",
       "variant": "original",
       "layer_name": "Retina1_referencia",
-      "path": "data/originales/Retina1.png",
+      "path": "originales/Retina1.png",
       "crop": [
         10,
         549,
@@ -28,7 +28,7 @@
       "case_id": "Retina3",
       "variant": "original",
       "layer_name": "Retina3_degradada",
-      "path": "data/originales/Retina3.png",
+      "path": "originales/Retina3.png",
       "crop": [
         10,
         549,
@@ -43,7 +43,7 @@
       "case_id": "Retina4",
       "variant": "original",
       "layer_name": "Retina4_degradada",
-      "path": "data/originales/Retina4.png",
+      "path": "originales/Retina4.png",
       "crop": [
         10,
         549,
@@ -58,7 +58,7 @@
       "case_id": "Retina5",
       "variant": "original",
       "layer_name": "Retina5_degradada",
-      "path": "data/originales/Retina5.png",
+      "path": "originales/Retina5.png",
       "crop": [
         10,
         549,
@@ -73,7 +73,7 @@
       "case_id": "Retina6",
       "variant": "original",
       "layer_name": "Retina6_degradada",
-      "path": "data/originales/Retina6.png",
+      "path": "originales/Retina6.png",
       "crop": [
         10,
         549,
@@ -88,7 +88,7 @@
       "case_id": "Retina7",
       "variant": "original",
       "layer_name": "Retina7_degradada",
-      "path": "data/originales/Retina7.png",
+      "path": "originales/Retina7.png",
       "crop": [
         10,
         549,
@@ -103,7 +103,7 @@
       "case_id": "Retina1_2",
       "variant": "realzada",
       "layer_name": "Retina2_gaussiano_clahe",
-      "path": "data/procesadas/Retina2_gaussiano_clahe.tif",
+      "path": "procesadas/Retina2_gaussiano_clahe.tif",
       "crop": null,
       "sha256": "104e9f927137c2592f1adea1c70eb1984c7292d8600c934d78af376dd15d79f5",
       "original_source": "resultados/imagenes_procesadas/Retina2_gaussiano_clahe.tif",
@@ -113,7 +113,7 @@
       "case_id": "Retina3",
       "variant": "corregida",
       "layer_name": "Retina3_variacion_total",
-      "path": "data/procesadas/Retina3_variacion_total.tif",
+      "path": "procesadas/Retina3_variacion_total.tif",
       "crop": null,
       "sha256": "e20dfcfd87476a989b083af55c03d18d6a9d507a234f774c1732f25a26f522e0",
       "original_source": "resultados/imagenes_procesadas/Retina3_variacion_total.tif",
@@ -123,7 +123,7 @@
       "case_id": "Retina4",
       "variant": "corregida",
       "layer_name": "Retina4_wiener",
-      "path": "data/procesadas/Retina4_wiener.tif",
+      "path": "procesadas/Retina4_wiener.tif",
       "crop": null,
       "sha256": "edb6cf5bdb2781b386117f540a28ceff43db9185b59cb1e68b0899b1810126f6",
       "original_source": "resultados/imagenes_procesadas/Retina4_wiener.tif",
@@ -133,7 +133,7 @@
       "case_id": "Retina5",
       "variant": "corregida",
       "layer_name": "Retina5_notch",
-      "path": "data/procesadas/Retina5_notch.tif",
+      "path": "procesadas/Retina5_notch.tif",
       "crop": null,
       "sha256": "7237c76af0f1f3fe7cf143679d3f5e05ecb002dc951443c508c9479196f86bc0",
       "original_source": "resultados/imagenes_procesadas/Retina5_notch.tif",
@@ -143,7 +143,7 @@
       "case_id": "Retina6",
       "variant": "intermedia",
       "layer_name": "Retina6_kernel_de_gran_escala",
-      "path": "data/procesadas/Retina6_kernel_de_gran_escala.tif",
+      "path": "procesadas/Retina6_kernel_de_gran_escala.tif",
       "crop": null,
       "sha256": "0b56b387ba06dc8a3df5282be83821cd76f2bf9133fc9a0baa22683ae2c4a4d3",
       "original_source": "resultados/imagenes_procesadas/Retina6_kernel_de_gran_escala.tif",
@@ -153,7 +153,7 @@
       "case_id": "Retina6",
       "variant": "corregida",
       "layer_name": "Retina6_kernel_de_gran_escala_clahe",
-      "path": "data/procesadas/Retina6_kernel_de_gran_escala_clahe.tif",
+      "path": "procesadas/Retina6_kernel_de_gran_escala_clahe.tif",
       "crop": null,
       "sha256": "5be7f18b7602d12b7ab70ba8263f57c7859eed0722bdc71b74c4a67acf91922c",
       "original_source": "resultados/imagenes_procesadas/Retina6_kernel_de_gran_escala_clahe.tif",
@@ -163,12 +163,13 @@
       "case_id": "Retina7",
       "variant": "corregida",
       "layer_name": "Retina7_gris_mediana",
-      "path": "data/procesadas/Retina7_gris_mediana.tif",
+      "path": "procesadas/Retina7_gris_mediana.tif",
       "crop": null,
       "sha256": "236bd7b8448c95db5ab7141fc9126536b6d542e551579f46b8fdd7b876797146",
       "original_source": "resultados/imagenes_procesadas/Retina7_gris_mediana.tif",
       "source_blob_sha": "1bed9ee6fe7b9c0f8427b4e68759331ab610fc32"
     }
   ],
-  "source_tree_sha": "ef73e8797f787c589bc78f25c98ef57d1e2676d8"
+  "source_tree_sha": "ef73e8797f787c589bc78f25c98ef57d1e2676d8",
+  "descripcion": "Pool de retinas de los TPs anteriores: conjunto externo (no se usa para entrenar). Rutas relativas a esta carpeta."
 }

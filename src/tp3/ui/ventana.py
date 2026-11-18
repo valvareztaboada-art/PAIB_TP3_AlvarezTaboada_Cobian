@@ -1,16 +1,16 @@
 """Arma la ventana del TP3: un visor de napari con solapas organizadas por función.
 
-    Datos         base HRF, ROIs de medición, regiones persistentes
+    Datos         base HRF, pool de retinas, ROIs de medición
     Calidad       medición en ROIs, diagnóstico, estimación de ruido, métricas
     Preproceso    escala de grises, ruido, deconvolución, notch, fondo, realce, degradaciones
-    Descriptores  descriptores por lotes, máscaras vasculares, feature maps por píxel
+    Descriptores  descriptores por ROI, segmentación vascular asistida, feature maps por píxel
     Segmentar     vasos con ML clásico y con U-Net
     Clasificar    sano / glaucoma / RD con ML clásico y con CNN
-    Resultados    registro y CSV, resultados de descriptores, ML vs DL, robustez
+    Resultados    registro y CSV, archivos de resultados, ML vs DL, robustez
 
-Cada solapa reúne herramientas por la tarea que resuelven, sin importar en qué
-trabajo se implementaron. El informe de texto y el progreso de los cálculos
-por lotes quedan en un panel fijo debajo del visor.
+Cada solapa reúne herramientas por la tarea que resuelven. Todas trabajan
+sobre las capas cargadas en el visor (imágenes HRF, pool o resultados
+intermedios). El informe de texto queda fijo debajo del visor.
 
 Para agregar una herramienta nueva, reemplazar el `pendiente(...)` de su
 sección por el widget correspondiente.
@@ -42,19 +42,20 @@ def _precargar_fuentes_vispy():
         _freetype._font_dict[f"OpenSans-{bold}-{italic}"] = font
 
 
-def _panel_inferior(informe, estado_lotes):
-    """Informe de texto a la izquierda; progreso y registro de lotes a la derecha."""
-    from qtpy.QtWidgets import QGroupBox, QHBoxLayout, QVBoxLayout, QWidget
+def _boton(texto, accion):
+    from qtpy.QtWidgets import QPushButton
 
-    w = QWidget()
-    w.setMaximumHeight(220)
-    lay = QHBoxLayout(w)
-    lay.setContentsMargins(4, 0, 4, 0)
-    for titulo, contenido, peso in (("Informe", informe, 3), ("Cálculos por lotes", estado_lotes, 2)):
-        caja = QGroupBox(titulo)
-        QVBoxLayout(caja).addWidget(contenido)
-        lay.addWidget(caja, peso)
-    return w
+    b = QPushButton(texto)
+    b.clicked.connect(accion)
+    return b
+
+
+def _abrir_carpeta(ruta):
+    from qtpy.QtCore import QUrl
+    from qtpy.QtGui import QDesktopServices
+
+    ruta.mkdir(parents=True, exist_ok=True)
+    QDesktopServices.openUrl(QUrl.fromLocalFile(str(ruta)))
 
 
 def crear_ventana(show=True):
@@ -75,24 +76,34 @@ def crear_ventana(show=True):
 
     viewer = napari.Viewer(title="PAIByB · TP3 · Alvarez Taboada / Cobián", show=show)
 
-    # Herramientas de preprocesamiento y calidad (toman napari.current_viewer()).
+    # Herramientas de calidad y preprocesamiento (toman napari.current_viewer()).
     from tp1 import ui as pre
 
     s = {k: b.native for k, b in pre.secciones.items()}
 
-    # Descriptores por lotes. El panel queda oculto: sólo se reparten sus páginas.
-    from tp2.batch_ui import Panel as PanelDescriptores
+    def informar(texto):
+        pre.informe.value = texto
 
-    descriptores = PanelDescriptores(viewer, rutas.ESPACIO_TP2)
-    d = descriptores.separar_secciones()
+    # Herramientas de descriptores sobre cualquier imagen y ROI del visor.
+    from tp2.ui import HerramientaDescriptores, HerramientaSegmentacion, cargar_pool
+
+    descriptores = HerramientaDescriptores(viewer, rutas.RESULTADOS_DESCRIPTORES, informar)
+    segmentacion = HerramientaSegmentacion(viewer, informar)
+
+    def _cargar_pool():
+        try:
+            n = cargar_pool(viewer, rutas.POOL)
+            informar(f"POOL DE RETINAS\n{n} imágenes agregadas desde {rutas.POOL.relative_to(rutas.RAIZ)} (hashes verificados).")
+        except Exception as e:  # noqa: BLE001
+            informar(f"POOL DE RETINAS · ERROR\n{e}")
 
     solapas = QTabWidget()
     solapas.setUsesScrollButtons(True)
     paginas = [
         ("Datos", "Datos y regiones", [
             ("Base HRF", pendiente("carga de imágenes, gold standard y FOV como capas; desbalance por imagen y grupo (Act. 1).")),
+            ("Pool de retinas (conjunto externo)", _boton("Cargar las 13 retinas de los TPs anteriores", _cargar_pool)),
             ("ROIs de medición", s["rois"]),
-            ("Regiones persistentes", d["rois"]),
         ]),
         ("Calidad", "Calidad de imagen", [
             ("Medición en ROIs (media / varianza / MAD)", s["medicion"]),
@@ -110,9 +121,10 @@ def crear_ventana(show=True):
             ("Degradaciones controladas", pendiente("ruido, artefacto periódico, desenfoque e iluminación no uniforme con parámetros documentados (Act. 8).")),
         ]),
         ("Descriptores", "Descriptores y feature maps", [
-            ("Cálculo por lotes", d["lotes"]),
-            ("Máscaras vasculares", d["mascaras"]),
+            ("Descriptores por ROI", descriptores.widget),
+            ("Segmentación vascular asistida (Frangi)", segmentacion.widget),
             ("Feature maps por píxel", pendiente("stack de intensidad, Gauss, gradiente, LoG/DoG, Gabor, LBP y estadísticos locales (Act. 3).")),
+            ("Descriptores por imagen HRF", pendiente("densidad, esqueleto, calibre, tortuosidad y textura en ROIs peripapilar, macular y periférica (Act. 4).")),
         ]),
         ("Segmentar", "Segmentación de vasos", [
             ("ML clásico (k-NN, SVM, Random Forest)", pendiente("entrenamiento con máscara completa o trazos, mapa de probabilidad y máscara final (Act. 3).")),
@@ -124,7 +136,7 @@ def crear_ventana(show=True):
         ]),
         ("Resultados", "Registro, resultados y comparación", [
             ("Registro del pipeline y CSV", s["registro"]),
-            ("Resultados de descriptores", d["resultados"]),
+            ("Archivos de resultados", _boton("Abrir la carpeta resultados/", lambda: _abrir_carpeta(rutas.RESULTADOS))),
             ("Comparación ML vs DL", pendiente("métricas en test, overlays TP/FP/FN, incertidumbre y eficiencia en datos (Act. 7).")),
             ("Robustez frente a degradaciones", pendiente("tabla modelo vs degradación, con y sin preprocesamiento (Act. 8).")),
         ]),
@@ -135,9 +147,8 @@ def crear_ventana(show=True):
 
     dock = viewer.window.add_dock_widget(solapas, area="right", name="TP3")
     dock.setMinimumWidth(520)
-    viewer.window.add_dock_widget(
-        _panel_inferior(pre.informe.native, d["estado"]), area="bottom", name="Informe"
-    )
-    # Referencia al panel oculto: mantiene vivos sus métodos conectados a los botones.
-    viewer.window._panel_descriptores = descriptores
+    pre.informe.native.setMaximumHeight(220)
+    viewer.window.add_dock_widget(pre.informe.native, area="bottom", name="Informe")
+    # Referencias a las herramientas: mantienen vivos los métodos conectados a sus botones.
+    viewer.window._herramientas_tp3 = dict(descriptores=descriptores, segmentacion=segmentacion)
     return viewer, solapas

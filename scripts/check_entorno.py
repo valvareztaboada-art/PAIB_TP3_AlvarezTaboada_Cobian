@@ -5,7 +5,7 @@ import importlib
 modulos = [
     "numpy", "scipy", "skimage", "sklearn", "pandas", "pywt", "cv2", "torch", "torchvision",
     "napari", "magicgui", "xlrd",
-    "tp1.core", "tp2.texture", "tp2.structure", "tp2.measure", "tp2.radiomics", "tp2.batch_ui",
+    "tp1.core", "tp2.texture", "tp2.structure", "tp2.measure", "tp2.radiomics", "tp2.ui",
     "tp3.datos", "tp3.splits", "tp3.ui.ventana",
 ]
 fallas = []

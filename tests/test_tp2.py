@@ -13,7 +13,6 @@ from tp2.radiomics import extract_radiomics, discretize, PYRADIOMICS
 from tp2.keypoints import match_pair
 from tp2.engine import run, replay
 from tp2.storage import save_measurement, read_records
-from tp2.comparison import build_matrix
 
 
 def test_intensity_native_and_background():
@@ -157,8 +156,6 @@ def test_export_and_replay(tmp_path):
         for k, v in record["caracteristicas"].items():
             if v is not None:
                 assert_allclose(repeated["features"][k], v, rtol=1e-9, atol=1e-9)
-    matrix, changes = build_matrix(tmp_path)
-    assert len(matrix) == 1
 
 
 def test_glcm_propia_distancia_chebyshev():

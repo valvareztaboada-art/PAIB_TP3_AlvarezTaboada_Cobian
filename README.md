@@ -32,8 +32,8 @@ curl -L -o data/HRF/raw/optic_disk_centers.xls https://www5.cs.fau.de/fileadmin/
 `data/manifest.csv` registra el SHA-256 de cada archivo, de modo que se puede comprobar que se
 trabaja con la misma base.
 
-Las retinas de los TPs anteriores (`espacio_tp2/data/`) no se usan para entrenar: son un conjunto
-externo para evaluar robustez frente a degradaciones.
+Las retinas de los TPs anteriores (`data/pool/`, 13 imágenes con sus hashes en `manifest.json`) no
+se usan para entrenar: son un conjunto externo para evaluar robustez frente a degradaciones.
 
 ## Reproducción
 
@@ -53,18 +53,22 @@ solapas con secciones plegables:
 
 | Solapa | Secciones |
 |---|---|
-| Datos | Base HRF · ROIs de medición · Regiones persistentes |
+| Datos | Base HRF · Pool de retinas (conjunto externo) · ROIs de medición |
 | Calidad | Medición en ROIs · Diagnóstico de ruido y artefactos · Estimación de ruido · Métricas de calidad antes/después |
 | Preproceso | Escala de grises y recorte · Reducción de ruido · Deconvolución · Artefactos periódicos (notch) · Corrección de fondo · Realce · Degradaciones controladas |
-| Descriptores | Cálculo por lotes (intensidad, forma, estructura vascular, textura, multiescala, puntos de interés, radiomics) · Máscaras vasculares · Feature maps por píxel |
+| Descriptores | Descriptores por ROI (intensidad, forma, estructura vascular, LBP, Gabor, Wavelet, multiescala, puntos de interés, radiómica) · Segmentación vascular asistida (Frangi) · Feature maps por píxel · Descriptores por imagen HRF |
 | Segmentar | ML clásico (k-NN, SVM, Random Forest) · Deep Learning (U-Net) |
 | Clasificar | ML clásico (k-NN, SVM, Random Forest) · Deep Learning (CNN) |
-| Resultados | Registro del pipeline y CSV · Resultados de descriptores · Comparación ML vs DL · Robustez frente a degradaciones |
+| Resultados | Registro del pipeline y CSV · Archivos de resultados · Comparación ML vs DL · Robustez frente a degradaciones |
 
-Debajo del visor quedan fijos el informe de texto de cada operación y el progreso de los cálculos
-por lotes. El visor abre vacío: el pool de retinas y sus regiones se cargan desde
-Datos › Regiones persistentes, o automáticamente al usar una herramienta que los necesita. Las herramientas de calidad y preprocesamiento guardan en `resultados/tp1/`; las de
-descriptores trabajan sobre `espacio_tp2/`.
+El visor abre vacío y todas las herramientas trabajan sobre las capas cargadas (imágenes HRF, el
+pool o resultados intermedios), con ROIs como capas Shapes o Labels. Debajo del visor queda fijo
+el informe de texto de cada operación.
+
+- Calidad y preprocesamiento registran en `resultados/tp1/`.
+- Cada medición de descriptores guardada agrega una fila al CSV de su familia en
+  `resultados/descriptores/` y un registro con la imagen, la ROI y los parámetros efectivos que
+  permite repetirla (`tp2.engine.replay`).
 
 ## División de los datos
 
@@ -89,8 +93,8 @@ análisis de eficiencia en datos.
 | `widget_tp3.py` | Lanzador del widget |
 | `src/tp1/core.py` | Funciones de calidad y preprocesamiento del TP1 (diagnóstico, filtrado, restauración, fondo, realce, métricas) |
 | `src/tp1/ui.py` | Bloques de interfaz de calidad y preprocesamiento |
-| `src/tp2/` | Descriptores del TP2 (medidas, estructura vascular, textura, multiescala, puntos, radiomics) y su interfaz por lotes (`batch_ui.py`) |
-| `espacio_tp2/` | Imágenes, regiones persistentes, configuración y resultados de los descriptores por lotes |
+| `src/tp2/` | Descriptores del TP2 (medidas, estructura vascular, textura, multiescala, puntos, radiómica), guardado reproducible y su interfaz (`ui.py`) |
+| `data/pool/` | Retinas de los TPs anteriores (conjunto externo) |
 | `src/tp3/datos.py` | Carga de HRF, grupos diagnósticos y centros del disco óptico |
 | `src/tp3/splits.py` | División por imagen y su validación |
 | `src/tp3/ml/` | ML clásico: feature maps, muestreo, segmentación y clasificación |
@@ -110,6 +114,6 @@ Python 3.10 con napari 0.5, PySide6, scikit-learn y PyTorch, fijado en `pixi.tom
   La GLCM se calcula con una implementación propia con las mismas definiciones (discretización
   fija, matriz simétrica, desplazamientos con distancia de Chebyshev d, promedio por dirección),
   que reproduce los valores de PyRadiomics 3.1.0 con error relativo < 1e-12. Las familias GLRLM,
-  GLSZM, GLDM y NGTDM quedan sin calcular (NaN) en el cálculo de descriptores por lotes.
+  GLSZM, GLDM y NGTDM quedan sin calcular (NaN).
 - Los modelos de Deep Learning se entrenan con GPU fuera del widget; el widget carga los pesos
   para la inferencia.

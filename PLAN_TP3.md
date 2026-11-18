@@ -162,12 +162,11 @@ PAIB_TP3/
 ├── _referencia/              # PDFs y widgets viejos: sólo consulta local, fuera de git
 ├── widget_tp3.py             # lanzador único: napari con solapas por función (ver decisión G)
 ├── config/  splits.json  preproceso.json  landmarks.csv
-├── data/    HRF/ (crudo, fuera de git)  procesado/
-├── espacio_tp2/              # config, ROIs, resultados y data/ (= pool de retinas) de los descriptores por lotes
+├── data/    HRF/ (crudo, fuera de git)  procesado/  pool/ (retinas de los TPs anteriores)
 ├── src/
 │   ├── tp1/core.py           # funciones puras del TP1
 │   ├── tp1/ui.py             # solapa TP1 (widget del TP1; toma napari.current_viewer())
-│   ├── tp2/                  # paquete completo del TP2; batch_ui.Panel se reparte en solapas
+│   ├── tp2/                  # cálculo de descriptores (engine), guardado reproducible (storage) e interfaz (ui.py)
 │   └── tp3/
 │       ├── datos.py splits.py degradaciones.py postproceso.py metricas.py registro.py descriptores.py
 │       ├── ml/  features.py  muestreo.py  segmentacion.py  clasificacion.py   ← Victoria
@@ -373,6 +372,7 @@ multiplican por ~2 **[verificar escala]**.
 | E | Repo compartido | Repo git local inicializado; falta crear el remoto en GitHub |
 | F | Radiomics | **pyradiomics descartado** (binarios sólo hasta Python 3.9). GLCM propia en `tp2/radiomics.py`, verificada contra los 157 valores del TP2 (error < 1e-12). GLRLM/GLSZM/GLDM/NGTDM = NaN |
 | G | Solapas | **Por función, no por TP** (pedido del profesor): Datos · Calidad · Preproceso · Descriptores · Segmentar · Clasificar · Resultados, con secciones plegables. Las herramientas del TP1 y TP2 se reparten entre ellas; ML y DL de una misma tarea comparten solapa. Cada herramienta nueva reemplaza un `pendiente(...)` en `src/tp3/ui/ventana.py` |
+| H | Herramienta de descriptores | El panel por lotes del TP2 (atado al pool, ROIs fijas y aprobación de máscaras) se reemplazó por una herramienta genérica sobre `tp2.engine.run`: cualquier imagen + ROI del visor, guardado reproducible. El pool quedó en `data/pool/` |
 
 ## 7. Estado de la puesta en marcha
 

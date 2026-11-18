@@ -11,9 +11,8 @@ HRF_MANUAL = HRF_RAW / "manual1"
 HRF_FOV = HRF_RAW / "mask"
 HRF_DISCO_XLS = HRF_RAW / "optic_disk_centers.xls"
 PROCESADO = DATA / "procesado"
-# Espacio de trabajo de los descriptores por lotes; su data/ es el pool de retinas de los TPs anteriores.
-ESPACIO_TP2 = RAIZ / "espacio_tp2"
-POOL_TP1 = ESPACIO_TP2 / "data"
+# Retinas de los TPs anteriores: conjunto externo de evaluación (no se entrena con ellas).
+POOL = DATA / "pool"
 
 CONFIG = RAIZ / "config"
 MANIFEST = DATA / "manifest.csv"
@@ -24,3 +23,5 @@ LANDMARKS = CONFIG / "landmarks.csv"
 MODELOS = RAIZ / "modelos"
 RESULTADOS = RAIZ / "resultados"
 CSV_RESULTADOS = RESULTADOS / "resultados_tp3.csv"
+# Un CSV por familia de descriptores y un registro reproducible por medición.
+RESULTADOS_DESCRIPTORES = RESULTADOS / "descriptores"
